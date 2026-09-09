@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureFlat CMS — Безопасная Flat-File CMS на PHP</title>
+    <meta name="description" content="Сверхлегкая, безопасная Flat-File CMS без базы данных. Один файл, WYSIWYG-редактор, поддержка CSS-фреймворков, усиленная защита от XSS, CSRF, Path Traversal.">
+    <meta name="keywords" content="CMS, flat-file, PHP, без базы данных, WYSIWYG, безопасная CMS, Tailwind, Bootstrap">
+    <meta property="og:title" content="SecureFlat CMS">
+    <meta property="og:description" content="Безопасная Flat-File CMS без БД. Один файл, мгновенная установка.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --danger: #dc2626;
+            --success: #059669;
+            --bg: #fafafa;
+            --text: #1a1a2e;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --card-bg: #ffffff;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text);
+            line-height: 1.7;
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        a { color: var(--primary); text-decoration: none; transition: all 0.2s; }
+        a:hover { color: var(--primary-dark); }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+        }
+        
+        nav ul {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        nav a:hover { color: var(--primary); }
+        
+        /* Hero */
+        .hero {
+            padding: 100px 0 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #eff6ff 0%, #fafafa 100%);
+        }
+        
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.3em;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto 36px;
+        }
+        
+        .badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            color: white;
+        }
+        
+        .btn-outline {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        /* Sections */
+        section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.1em;
+            max-width: 600px;
+            margin: 0 auto 50px;
+        }
+        
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 16px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* Security */
+        .security {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+        }
+        
+        .security .section-title { color: white; }
+        .security .section-subtitle { color: #94a3b8; }
+        
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        
+        .security-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .security-item h4 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #60a5fa;
+        }
+        
+        .security-item p {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+        
+        /* Installation */
+        .install-steps {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+        
+        .step-content h3 {
+            font-size: 1.2em;
+            margin-bottom: 6px;
+        }
+        
+        .step-content p {
+            color: var(--text-light);
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+        
+        /* Download */
+        .download {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            text-align: center;
+        }
+        
+        .download-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 48px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.15);
+        }
+        
+        .download-box h2 {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+        
+        .download-box p {
+            color: var(--text-light);
+            margin-bottom: 28px;
+        }
+        
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        footer a { color: #60a5fa; }
+        footer a:hover { color: #93c5fd; }
+        
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2em; }
+            .hero .subtitle { font-size: 1.1em; }
+            .section-title { font-size: 1.7em; }
+            nav ul { display: none; }
+            .step { flex-direction: column; gap: 12px; }
+            .download-box { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="logo">
+            <span class="logo-icon">🛡️</span>
+            <span>SecureFlat CMS</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#security">Безопасность</a></li>
+                <li><a href="#install">Установка</a></li>
+                <li><a href="#download">Скачать</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <h1>SecureFlat CMS</h1>
+        <p class="subtitle">
+            Сверхлегкая, безопасная Flat-File CMS без базы данных.<br>
+            <strong>Один файл. Мгновенная установка. Максимальная защита.</strong>
+        </p>
+        
+        <div class="badges">
+            <span class="badge">🐘 PHP 8.1+</span>
+            <span class="badge">📦 Без БД</span>
+            <span class="badge">🔒 Argon2id / Bcrypt</span>
+            <span class="badge">🎨 CSS-фреймворки</span>
+            <span class="badge">📝 WYSIWYG</span>
+        </div>
+        
+        <div class="cta-buttons">
+            <a href="#download" class="btn btn-primary">⬇️ Скачать index.php</a>
+            <a href="https://github.com/itoren/SecureFlat" class="btn btn-outline" target="_blank">⭐ GitHub</a>
+        </div>
+    </div>
+</section>
+
+<section id="features">
+    <div class="container">
+        <h2 class="section-title">✨ Возможности</h2>
+        <p class="section-subtitle">Всё, что нужно для современного сайта, в одном файле</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📄</div>
+                <h3>Один файл</h3>
+                <p>Весь движок — это <code>index.php</code>. Никаких зависимостей, Composer, npm или сложных конфигураций.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🗄️</div>
+                <h3>Без базы данных</h3>
+                <p>Данные хранятся в JSON-файлах с атомарной записью и блокировкой <code>LOCK_EX</code>.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>CSS-фреймворки</h3>
+                <p>Подключайте Tailwind, Bootstrap или любой другой фреймворк через CDN прямо из админки.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>WYSIWYG-редактор</h3>
+                <p>Встроенный визуальный редактор с drag-and-drop изображений и вставкой из буфера обмена.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎭</div>
+                <h3>Система шаблонов</h3>
+                <p>Полное редактирование HTML-шаблонов через админку с поддержкой переменных.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📁</div>
+                <h3>Файловый менеджер</h3>
+                <p>Загрузка изображений и документов с проверкой MIME-типов и защитой от вредоносных файлов.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Адаптивный дизайн</h3>
+                <p>Панель управления и публичная часть корректно работают на любых устройствах.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Мгновенная установка</h3>
+                <p>Загрузите файл, откройте в браузере, придумайте пароль — готово за 30 секунд.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="security" class="security">
+    <div class="container">
+        <h2 class="section-title">🔒 Архитектура безопасности</h2>
+        <p class="section-subtitle">Многоуровневая защита от современных угроз</p>
+        
+        <div class="security-grid">
+            <div class="security-item">
+                <h4>🛡️ XSS-защита</h4>
+                <p>Многоступенчатая очистка HTML на основе whitelist тегов и атрибутов.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>🔑 CSRF-токены</h4>
+                <p>Криптографически стойкие токены для каждого POST-запроса.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>🚫 Path Traversal</h4>
+                <p>Строгая валидация путей через <code>realpath</code> и запрет <code>../</code>.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>⏱️ Rate Limiting</h4>
+                <p>Защита от брутфорса: максимум 5 попыток входа за 15 минут.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>🔐 Secure Sessions</h4>
+                <p>Куки с флагами <code>HttpOnly</code>, <code>SameSite=Strict</code>, <code>Secure</code>.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>🎯 Привязка к IP</h4>
+                <p>Сессия администратора привязана к IP-адресу для защиты от угона cookie.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>📋 Content-Security-Policy</h4>
+                <p>Динамический CSP, адаптирующийся под подключенные внешние ресурсы.</p>
+            </div>
+            
+            <div class="security-item">
+                <h4>🔒 Хеширование паролей</h4>
+                <p>Argon2id с автоматическим откатом на Bcrypt для совместимости.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="install">
+    <div class="container">
+        <h2 class="section-title">🚀 Установка за 30 секунд</h2>
+        <p class="section-subtitle">Без консоли, без Composer, без сложных настроек</p>
+        
+        <div class="install-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Скачайте файл</h3>
+                    <p>Загрузите единственный файл <code>index.php</code> на ваш сервер.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Загрузите на хостинг</h3>
+                    <p>Поместите файл в пустую папку через FTP или файловый менеджер.</p>
+                    <div class="code-block">ftp upload index.php → /public_html/</div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Откройте в браузере</h3>
+                    <p>Перейдите по адресу вашего сайта и следуйте инструкциям установщика.</p>
+                    <div class="code-block">https://yourdomain.com/</div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Придумайте пароль</h3>
+                    <p>Введите пароль администратора (минимум 8 символов) — готово!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="download" class="download">
+    <div class="container">
+        <div class="download-box">
+            <h2>⬇️ Скачать SecureFlat CMS</h2>
+            <p>Один файл. Никаких зависимостей. Полностью бесплатно.</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/itoren/SecureFlat/releases/download/1.2.0/index.php" class="btn btn-primary" download>📥 Скачать index.php</a>
+                <a href="https://github.com/itoren/SecureFlat" class="btn btn-outline" target="_blank">⭐ GitHub</a>
+            </div>
+            <p style="margin-top: 20px; font-size: 14px; color: var(--text-light);">
+                Требуется: PHP 8.1+ · Расширение <code>fileinfo</code> · Права на запись
+            </p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-links">
+            <a href="https://github.com/itoren/SecureFlat">GitHub</a>
+        </div>
+        <p>
+            SecureFlat CMS v1.2.0 · Создано с ❤️ для безопасного веба<br>
+            © 2026 · Распространяется под лицензией MIT
+        </p>
+    </div>
+</footer>
+
+<script>
+    // Плавная прокрутка
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
